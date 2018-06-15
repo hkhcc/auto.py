@@ -12,9 +12,12 @@ from numpy import percentile
 from scipy import stats
 xlApp = win32com.client.Dispatch("Excel.Application")
 workbook = xlApp.Workbooks.Open(os.path.expanduser('~') + "/Desktop/result.xls", False, True, None, "Lis*****")
-PHI_list = xlApp.Workbooks.Open(os.path.expanduser('~') + "/Desktop/PHI list.xls", False, True, None, "Phi*****")
 sheet1 = workbook.Sheets(1).UsedRange.Value
-sheet2 = PHI_list.Sheets(1).UsedRange.Value
+try:
+    PHI_list = xlApp.Workbooks.Open(os.path.expanduser('~') + "/Desktop/PHI list.xls", False, True, None, "Phi*****")
+    sheet2 = PHI_list.Sheets(1).UsedRange.Value
+except:
+    print('PHI_list.xls NOT loaded!', file=sys.stderr)
 
 
 
