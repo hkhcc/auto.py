@@ -1,7 +1,9 @@
+#This is the newest version of auto.py and supercedes 1.02 with effective date 11/09/2017.
 #!/usr/bin/env python3
 import datetime
 import math
 import os
+import platform
 import random
 import re
 import sys
@@ -10,7 +12,11 @@ from numpy import percentile
 from scipy import stats
 xlApp = win32com.client.Dispatch("Excel.Application")
 workbook = xlApp.Workbooks.Open(os.path.expanduser('~') + "/Desktop/result.xls", False, True, None, "Lis*****")
+PHI_list = xlApp.Workbooks.Open(os.path.expanduser('~') + "/Desktop/PHI list.xls", False, True, None, "Phi*****")
 sheet1 = workbook.Sheets(1).UsedRange.Value
+sheet2 = PHI_list.Sheets(1).UsedRange.Value
+
+
 
 
 def bootstrap_CI(input_list, lower_percentile=5, upper_percentile=95, replicates=100):
@@ -275,6 +281,15 @@ class MPRL_Patient:
         else:
             raise ValueError
 
+class PHI:
+    '''A patient undergoing PHI testing'''
+    def __init__(self, reqno, pid, pname, phi_past, psa):
+        self.reqno = reqno
+        self.pid = pid
+        self.pname = pname
+        self.phi_past = int(phi_past)
+        self.psa= psa
+
 class QC:
     '''A QC object'''
 
@@ -328,6 +343,8 @@ else:
         tag = 'xTFT'
     elif sheet1[1][0] == 'T3Tox':
         tag = 'T3Tox'
+    elif sheet1[0][0] == 'Request_Number_PHI':
+        tag = 'PHI'
     else:
         raise ValueError('Tag not valid!')
 
@@ -336,6 +353,44 @@ print('#', tag, "input was identified", file=sys.stderr)
 # initialize the patient list
 patients = []
 this_patient = None
+
+if tag == 'PHI':
+    wl = os.stat(os.path.expanduser('~') + "/Desktop/PHI list.xls")
+    wltime = datetime.datetime.fromtimestamp(wl.st_mtime)
+    print("The last modified date and time of the PHI List:", wltime)
+    id_list = []
+    Cancel = 0
+    Proceed = 0
+    decision = ''
+    total = 0
+    for r in sheet2[1:]:
+        if r[2] != None:
+            id_list.append(r[2])    
+    for row in sheet1[1:]:
+        this_patient = PHI(row[0], row[1], row[2], row[3], row[4])
+        patients.append(this_patient)
+        if this_patient.pid in id_list:
+            decision = 'Proceed. The patient is in PWH study. Please check if tPSA is done.'
+            Proceed += 1
+        elif this_patient.psa == None:
+            decision = 'T/F. tPSA not done.'
+        elif this_patient.phi_past > 0:
+            decision = 'Cancel. '+ str(this_patient.phi_past) + ' test(s) have been done in previous year.'
+            Cancel += 1
+        elif float(this_patient.psa) > 20 or float(this_patient.psa) < 2:
+            decision = 'Cancel. The tPSA result is ' + str(this_patient.psa)
+            Cancel += 1
+        else:
+            decision = 'Proceed. tPSA = ' + str(this_patient.psa)
+            Proceed += 1
+        print (this_patient.reqno + ' ' + this_patient.pname + ': ' + decision + '\n')
+        total +=1
+    print ('Total number of samples:', total)
+    print ('Total number of proceeds:', Proceed)
+    print ('Total number of cancels:', Cancel)
+    print ('Total number of T/F:', total - Proceed - Cancel)
+    print ('Total number of patients in PWH study:', len(id_list))
+            
 
 if tag == 'TFT':
     output_cache, ft4_list, tsh_list = [], [], []
@@ -443,16 +498,13 @@ elif tag == 'T3Tox':
         pid[row[37]][row[50]].append([row[27], row[10], row[1]])
     for p in pid:
         print('#####')
-        try:
-            for ft4 in pid[p]['FT4']:
-                print(to_time(ft4[0]), ft4[1], ft4[2])
-            for ft4 in pid[p]['FT4-B']:
-                print(to_time(ft4[0]), ft4[1], ft4[2])
-            y = [x[1] for x in pid[p]['FT4']] + [x[1] for x in pid[p]['FT4-B']]
-            x = [to_time(x[0]) for x in pid[p]['FT4']] + [to_time(x[0]) for x in pid[p]['FT4-B']]
-            plt.scatter(x=x, y=y)
-        except:
-            pass
+        for ft4 in pid[p]['FT4']:
+            print(to_time(ft4[0]), ft4[1], ft4[2])
+        for ft4 in pid[p]['FT4-B']:
+            print(to_time(ft4[0]), ft4[1], ft4[2])
+        y = [x[1] for x in pid[p]['FT4']] + [x[1] for x in pid[p]['FT4-B']]
+        x = [to_time(x[0]) for x in pid[p]['FT4']] + [to_time(x[0]) for x in pid[p]['FT4-B']]
+        plt.scatter(x=x, y=y)
         plt.show()
 
 elif tag == 'DNA1':
