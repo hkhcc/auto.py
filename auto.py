@@ -498,13 +498,17 @@ elif tag == 'T3Tox':
         pid[row[37]][row[50]].append([row[27], row[10], row[1]])
     for p in pid:
         print('#####')
-        for ft4 in pid[p]['FT4']:
-            print(to_time(ft4[0]), ft4[1], ft4[2])
-        for ft4 in pid[p]['FT4-B']:
-            print(to_time(ft4[0]), ft4[1], ft4[2])
-        y = [x[1] for x in pid[p]['FT4']] + [x[1] for x in pid[p]['FT4-B']]
-        x = [to_time(x[0]) for x in pid[p]['FT4']] + [to_time(x[0]) for x in pid[p]['FT4-B']]
-        plt.scatter(x=x, y=y)
+        # added try-except to prevent error on empty or invalid results - CCHO 20180615
+        try:
+            for ft4 in pid[p]['FT4']:
+                print(to_time(ft4[0]), ft4[1], ft4[2])
+            for ft4 in pid[p]['FT4-B']:
+                print(to_time(ft4[0]), ft4[1], ft4[2])
+            y = [x[1] for x in pid[p]['FT4']] + [x[1] for x in pid[p]['FT4-B']]
+            x = [to_time(x[0]) for x in pid[p]['FT4']] + [to_time(x[0]) for x in pid[p]['FT4-B']]
+            plt.scatter(x=x, y=y)
+        except:
+            pass
         plt.show()
 
 elif tag == 'DNA1':
