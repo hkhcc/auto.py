@@ -515,35 +515,35 @@ elif tag == 'T3Tox':
 
 elif tag == 'DNA1':
     '''
-    SELECT * FROM
-    (
-        SELECT
-            (SELECT MAX(req_name) FROM request WHERE req_pid_group = adna_table.testrslt_pid_group) "Name",
-            adna_table.testrslt_reqno "REQNO",
-            ana_table.testrslt_result "ANA_result",
-            CASE WHEN ana_table.testrslt_member_ckey = 5152 THEN "pattern" ELSE "titre" END "Type",
-            ana_table.testrslt_reqno "ANA_REQNO",
-            ana_table.testrslt_status "ANA_status",
-            ana_table.testrslt_status_date "ANA_date",
-            ana_table.testrslt_pid_group "pid_group",
-            (SELECT COUNT(*) FROM testrslt
-            WHERE
-            testrslt_member_ckey = 5952
-            AND
-            testrslt_pid_group = adna_table.testrslt_pid_group
-            AND
-            testrslt_status = 6
-            ) "Prev_ADNA_count",
-            (SELECT req_age FROM request WHERE req_reqno = adna_table.testrslt_reqno) "Age"
-        FROM
-            (SELECT * FROM testrslt
-            WHERE testrslt_reqno IN (SELECT req_reqno FROM request_detail WHERE req_reqno IN (select req_reqno from request where req_complete <= 1) AND req_alpha_code = 'ADNA')
-            AND testrslt_member_ckey = 5952 AND testrslt_status <= 1) adna_table
-        LEFT JOIN
-            (SELECT testrslt_result, testrslt_member_ckey, testrslt_status, testrslt_status_date, testrslt_reqno, testrslt_pid_group FROM testrslt WHERE testrslt_member_ckey = 5152 or testrslt_member_ckey = 5160) ana_table
-        ON
-            adna_table.testrslt_pid_group = ana_table.testrslt_pid_group
-    ) pre_filter ORDER BY pid_group, REQNO, ANA_REQNO
+    SELECT * FROM 
+	(
+		SELECT
+			(SELECT MAX(req_name) FROM request WHERE req_pid_group = adna_table.testrslt_pid_group) "DNA_Name",
+			adna_table.testrslt_reqno "REQNO",
+			ana_table.testrslt_result "ANA_result",
+			CASE WHEN ana_table.testrslt_member_ckey = 5152 THEN "pattern" ELSE "titre" END "Type",
+			ana_table.testrslt_reqno "ANA_REQNO",
+			ana_table.testrslt_status "ANA_status",
+			ana_table.testrslt_status_date "ANA_date",
+			ana_table.testrslt_pid_group "pid_group",
+			(SELECT COUNT(*) FROM testrslt 
+			WHERE 
+			(testrslt_member_ckey = 5952 OR testrslt_member_ckey =  6334)
+			AND 
+			testrslt_pid_group = adna_table.testrslt_pid_group
+			AND
+			testrslt_status = 6
+			) "Prev_ADNA_count",
+			(SELECT req_age FROM request WHERE req_reqno = adna_table.testrslt_reqno) "Age"
+		FROM
+			(SELECT * FROM testrslt 
+			WHERE testrslt_reqno IN (SELECT req_reqno FROM request_detail WHERE req_reqno IN (select req_reqno from request where req_complete <= 1) AND req_alpha_code = 'DNA2')
+			AND testrslt_member_ckey = 6334 AND testrslt_status <= 1) adna_table
+		LEFT JOIN
+			(SELECT testrslt_result, testrslt_member_ckey, testrslt_status, testrslt_status_date, testrslt_reqno, testrslt_pid_group FROM testrslt WHERE testrslt_member_ckey = 5152 or testrslt_member_ckey = 5160) ana_table
+		ON
+			adna_table.testrslt_pid_group = ana_table.testrslt_pid_group
+	) pre_filter ORDER BY pid_group, REQNO, ANA_REQNO
     '''
     for row in sheet1[1:]:
         if this_patient == None or this_patient.reqno != row[1]: # new request
