@@ -328,7 +328,7 @@ else:
         tag = 'TFT2'
     elif sheet1[0][0] == 'TFT3':
         tag = 'TFT3'
-    elif sheet1[0][2].startswith('ANA_result'):
+    elif sheet1[0][0].startswith('DNA_Name'):
         tag = 'DNA1'
     elif sheet1[0][0].startswith('_SPE_'):
         tag = 'SPE'
@@ -375,11 +375,11 @@ if tag == 'PHI':
         if this_patient.pid in id_list:
             decision = 'Proceed. The patient is in PWH study. Please check if tPSA is done.'
             Proceed += 1
-        elif this_patient.psa == None:
-            decision = 'T/F. tPSA not done.'
         elif this_patient.phi_past > 0:
             decision = 'Cancel. '+ str(this_patient.phi_past) + ' test(s) have been done in previous year.'
             Cancel += 1
+        elif this_patient.psa == None:
+            decision = 'T/F. tPSA not done.'
         elif float(this_patient.psa) > 20 or float(this_patient.psa) < 2:
             decision = 'Cancel. The tPSA result is ' + str(this_patient.psa)
             Cancel += 1
@@ -394,7 +394,6 @@ if tag == 'PHI':
     print ('Total number of T/F:', total - Proceed - Cancel)
     print ('Total number of patients in PWH study:', len(id_list))
             
-
 if tag == 'TFT':
     output_cache, ft4_list, tsh_list = [], [], []
     for row in sheet1[1:]:
