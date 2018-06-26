@@ -156,7 +156,14 @@ class ADNA_Patient:
         self.ana_reqno = []
 
     def new_titre(self, titre, date):
-        dilution = int(titre.split(':')[1])
+        try:
+            dilution = int(titre.split(':')[1])
+        except:
+            if titre == 'Quantity Insufficient':
+                print('# QI in titre field.', file=sys.stderr)
+                return None
+            else:
+                raise ValueError('Unexpected titre:', titre)
         if dilution < 40 or dilution > 2560:
             raise ValueError(titre)
         if dilution >= self.highest_titre:
