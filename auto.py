@@ -1,4 +1,4 @@
-#This is the newest version of auto.py and supercedes 1.02 with effective date 11/09/2017.
+#This is the newest version of auto.py and supercedes 1.03 with effective date 12/07/2018.
 #!/usr/bin/env python3
 import datetime
 import math
@@ -387,7 +387,7 @@ if tag == 'PHI':
             Cancel += 1
         elif this_patient.psa == None:
             decision = 'T/F. tPSA not done.'
-        elif float(this_patient.psa) > 20 or float(this_patient.psa) < 2:
+        elif float(this_patient.psa) > 12 or float(this_patient.psa) < 2:
             decision = 'Cancel. The tPSA result is ' + str(this_patient.psa)
             Cancel += 1
         else:
