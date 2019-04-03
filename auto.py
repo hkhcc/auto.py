@@ -1,4 +1,4 @@
-#This is the newest version of auto.py and supercedes 1.03 with effective date 12/07/2018.
+#This is the newest version of auto.py and supercedes 1.02 with effective date 11/09/2017.
 #!/usr/bin/env python3
 import datetime
 import math
@@ -88,7 +88,7 @@ def to_time(py_time_object):
 
 class SPE_Patient:
     '''A patient undergoing SPE testing'''
-    def __init__(self, name, pid, reqno, sex, age, location, total_protein, clinical_details):
+    def __init__(self, name, pid, reqno, sex, age, location, total_protein, clinical_details, dob):
         self.name = name
         self.pid = pid
         self.reqno = reqno
@@ -102,6 +102,7 @@ class SPE_Patient:
                       'IF': {},
                       'BJP': {}}
         self.diagnosis = clinical_details
+        self.dob = dob
 
     def new_test(self, code, reqno, date, result):
         if code in self.tests:
@@ -139,7 +140,29 @@ class SPE_Patient:
 
         return text_report
 
+'''class SPE_Patient_interlab:
+    A patient undergoing SPE testing
+    def __init__(self, reqno, total_protein, location, name, sex, dob, pid):
+        self.reqno = reqno
+        if total_protein == None:
+            total_protein = -1
+        self.total_protein = round(total_protein, 2)
+        self.location = location
+        self.name = name
+        self.sex = sex
+        self.dob = dob
+        self.pid = pid
+        self.tests = {'SPE': {},
+                      'IF': {},
+                      'BJP': {}}
 
+    def new_test(self, code, reqno, date, result):
+        if code in self.tests:
+            self.tests[code][reqno] = {'date': date,
+                                       'result': result}
+        else:
+            raise ValueError(code)'''
+    
 class ADNA_Patient:
     '''A patient undergoing anti-dsDNA testing'''
     def __init__(self, name, pid, reqno, past_adna, age):
@@ -387,7 +410,7 @@ if tag == 'PHI':
             Cancel += 1
         elif this_patient.psa == None:
             decision = 'T/F. tPSA not done.'
-        elif float(this_patient.psa) > 12 or float(this_patient.psa) < 2:
+        elif float(this_patient.psa) > 20 or float(this_patient.psa) < 2:
             decision = 'Cancel. The tPSA result is ' + str(this_patient.psa)
             Cancel += 1
         else:
@@ -679,7 +702,7 @@ elif tag == 'SPE' or tag == 'BJP':
             print('#', row[0], row[1], row[2], 'was not added due to invalid batch number!', file=sys.stderr)
             continue
         if this_patient == None or this_patient.pid != row[1]: # "new" i.e. different SPE patient
-            this_patient = SPE_Patient(row[0], row[1], row[2], row[6], row[7], '/'.join([row[8], row[9], row[10]]), row[11], row[12])
+            this_patient = SPE_Patient(row[0], row[1], row[2], row[6], row[7], '/'.join([row[8], row[9], row[10]]), row[11], row[12], row[15])
             patients.append(this_patient)
         this_patient.new_test(row[3], row[2], row[4], row[5])
     print('#', len(patients), 'patients added...', file=sys.stderr)
@@ -694,7 +717,13 @@ elif tag == 'SPE' or tag == 'BJP':
             position_count += 1
 
     print("@") # the terminator character for VBScript loader.vbs
-
+    print("---For InterLab SPE, please copy the following statements, including the first blank line, to new notepad and save as 'SPE_import.asc'.---")
+    print()
+    for p in patients:
+            print(str('''""'''+ re.split("[A-Z]", p.reqno)[1]), p.total_protein, p.location, str('"'+ str(p.name).replace(",", ", ")+ '"'), p.sex, str('"'+ p.dob+ '"'), p.pid, '''"\x03"''', sep=',')
+    '''for p in patients:
+            print('"', re.split("[A-Z]", p.reqno)[1], p.total_protein, p.location, str(p.name).replace(",", ", "), p.sex, p.dob, p.pid, '"\x03"', sep='","')'''
+    print('InterLab SPE ends. do not copy this sentence.\n')
     print('# Now printing past SPE/BJP/IF results...', file=sys.stderr)
     patient_counter = 1
     p_names = []
