@@ -287,7 +287,7 @@ class MPRL_Patient:
         '''Decide whether to test for macroprolactin again'''
         # test if no previous testing done
         if self.new_mprl_count + self.old_mprl_count == 0:
-            self.decision = 'Proceed (no previous MPRL)'
+            self.decision = 'Proceed (no previous MPRL within 1 year)'
             return
 
         # test if recovery all along below 70%
